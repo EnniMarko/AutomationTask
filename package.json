@@ -1,0 +1,14 @@
+{
+  "name": "automationtask",
+  "version": "1.0.0",
+  "description": "The Project created to show my abilities in creating automation staff.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Borys Fursov",
+  "license": "ISC",
+  "dependencies": {
+    "newman": "^5.2.1"
+  }
+}

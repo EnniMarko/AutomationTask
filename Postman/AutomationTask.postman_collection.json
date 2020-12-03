@@ -1,0 +1,439 @@
+{
+	"info": {
+		"_postman_id": "c6c824d1-80b6-43c5-a79e-9307fe8572e1",
+		"name": "AutomationTask",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "ServerIsAlive",
+			"item": [
+				{
+					"name": "Server is Alive",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "75dc0cc6-326c-47de-adba-18ef4ba9790e",
+								"exec": [
+									"pm.test(\"Status test, returns BadRequest if no search keywords was provided\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"host": true,
+							"user-agent": true,
+							"accept": true,
+							"accept-encoding": true,
+							"connection": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}?apikey={{apikey}}",
+							"host": [
+								"{{url}}"
+							],
+							"query": [
+								{
+									"key": "apikey",
+									"value": "{{apikey}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Expected successful cases",
+			"item": [
+				{
+					"name": "SearchByKeywords",
+					"item": [
+						{
+							"name": "Search by Keywords Works",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "7dfa1535-c2eb-4f14-ae9d-b081bbbb4644",
+										"exec": [
+											"res = pm.response.json();",
+											"",
+											"pm.test(\"The Movies was found, and Search array has length more than 0\", function () {",
+											"    pm.expect(res.Search.length>0).to.be.true",
+											"    ",
+											"    let movie = res.Search[0];",
+											"    pm.expect(movie).to.have.property('imdbID');",
+											"    pm.expect(movie).to.have.property('Title');",
+											"    pm.expect(movie).to.have.property('Year');",
+											"    ",
+											"    //save object to the variable",
+											"    pm.environment.set(\"MovieJson\", JSON.stringify(movie));",
+											"    pm.environment.set(\"imdbID\", movie.imdbID);",
+											"    pm.environment.set(\"MovieTitle\", movie.Title);",
+											"    pm.environment.set(\"MovieYear\", movie.Year);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}?apikey={{apikey}}&s={{search}}",
+									"host": [
+										"{{url}}"
+									],
+									"query": [
+										{
+											"key": "apikey",
+											"value": "{{apikey}}"
+										},
+										{
+											"key": "s",
+											"value": "{{search}}"
+										}
+									]
+								},
+								"description": "Checks the search and saves the name of the movie"
+							},
+							"response": []
+						},
+						{
+							"name": "Search by Keywords and Year Works",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "401ad9bd-833f-4325-b068-0e8a8b1c98ae",
+										"exec": [
+											"res = pm.response.json();",
+											"",
+											"pm.test(\"The Movies was found, and Search array has length more than 0\", function () {",
+											"    pm.expect(res.Search.length>0).to.be.true",
+											"});",
+											"pm.test(\"The only movie shown and totalResults is 1\", function () {",
+											"    pm.expect(res.Search.length).to.be.eq(1);",
+											"    pm.expect(res.totalResults).to.be.eq('1');",
+											"});",
+											"",
+											"pm.test(\"The movie is we were looking for\", () => {",
+											"    let movie = res.Search[0];",
+											"    pm.expect(JSON.stringify(movie)).to.be.eq(pm.environment.get(\"MovieJson\"));",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "f4edeafa-0c02-4648-a0be-9ecfbfa547d9",
+										"exec": [
+											"pm.environment.set(\"searchencoded\", encodeURIComponent(pm.environment.get(\"MovieTitle\")));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}?apikey={{apikey}}&s={{searchencoded}}&y={{MovieYear}}",
+									"host": [
+										"{{url}}"
+									],
+									"query": [
+										{
+											"key": "apikey",
+											"value": "{{apikey}}"
+										},
+										{
+											"key": "s",
+											"value": "{{searchencoded}}"
+										},
+										{
+											"key": "y",
+											"value": "{{MovieYear}}"
+										}
+									]
+								},
+								"description": "Checks the search and saves the name of the movie"
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "SearchByID",
+					"item": [
+						{
+							"name": "Search by imdbId works",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "b3044f3e-9169-4884-96c4-8cbaaf07271f",
+										"exec": [
+											"res = pm.response.json();",
+											"",
+											"pm.test(\"The Responce have expected fields\", () => {",
+											"    pm.expect(res).to.have.property('Title');",
+											"    pm.expect(res).to.have.property('Year');",
+											"    pm.expect(res).to.have.property('Rated');",
+											"    pm.expect(res).to.have.property('Released');",
+											"    pm.expect(res).to.have.property('Runtime');",
+											"    pm.expect(res).to.have.property('Plot');",
+											"    pm.expect(res).to.have.property('imdbVotes');",
+											"    pm.expect(res).to.have.property('Type');",
+											"    pm.expect(res).to.have.property('Response');",
+											"});",
+											"",
+											"//save the plot for the next test:",
+											"pm.environment.set(\"plotShort\", res.Plot)",
+											"pm.environment.set(\"responceIdDefault\", JSON.stringify(res))",
+											"pm.test(\"The Movie was found\", () => {",
+											"    pm.expect(res.Title).to.be.eq(pm.environment.get(\"MovieTitle\"))",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "5d5fda14-e810-4835-a0be-b2f12953f2e7",
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}?apikey={{apikey}}&i={{imdbID}}",
+									"host": [
+										"{{url}}"
+									],
+									"query": [
+										{
+											"key": "apikey",
+											"value": "{{apikey}}"
+										},
+										{
+											"key": "i",
+											"value": "{{imdbID}}"
+										}
+									]
+								},
+								"description": "Checks the search and saves the name of the movie"
+							},
+							"response": []
+						},
+						{
+							"name": "Short Plot is Default",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "417f40a3-d3e1-42c2-b780-10f5af477c16",
+										"exec": [
+											"res = pm.response.json();",
+											"",
+											"pm.test(\"The response is identical to the previous\",  () => {",
+											"    pm.expect(JSON.stringify(res)).to.be.eq(pm.environment.get(\"responceIdDefault\"));",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "99d64d3d-02fa-4056-bf97-92a2cc184e14",
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}?apikey={{apikey}}&i={{imdbID}}&plot=short",
+									"host": [
+										"{{url}}"
+									],
+									"query": [
+										{
+											"key": "apikey",
+											"value": "{{apikey}}"
+										},
+										{
+											"key": "i",
+											"value": "{{imdbID}}"
+										},
+										{
+											"key": "plot",
+											"value": "short"
+										}
+									]
+								},
+								"description": "Checks the search and saves the name of the movie"
+							},
+							"response": []
+						},
+						{
+							"name": "Search by imdbId works full plot",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "472525a4-53ac-46b8-9738-aea347fc848a",
+										"exec": [
+											"res = pm.response.json();",
+											"previousRes = JSON.parse(pm.environment.get(\"responceIdDefault\"));",
+											"delete previousRes.Plot;",
+											"delete res.Plot;",
+											"console.log(previousRes);",
+											"console.log(res);",
+											"console.log(_.isEqual(previousRes, res));",
+											"",
+											"pm.test(\"The response is identical to the previousRes, except the Plot Property\",  () => {",
+											"    delete previousRes.Plot;",
+											"    delete res.Plot;",
+											"        pm.expect(_.isEqual(previousRes, res));",
+											"    res = pm.response.json();",
+											"    previousRes = JSON.parse(pm.environment.get(\"responceIdDefault\"));",
+											"});",
+											"",
+											"pm.test(\"The Plot fields are not identical\", () => {",
+											"    pm.expect(_.isEqual(previousRes.Plot, res.Plot));",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "d94c67a1-0fb5-482d-804d-bf1814bcc62c",
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}?apikey={{apikey}}&i={{imdbID}}&plot=full",
+									"host": [
+										"{{url}}"
+									],
+									"query": [
+										{
+											"key": "apikey",
+											"value": "{{apikey}}"
+										},
+										{
+											"key": "i",
+											"value": "{{imdbID}}"
+										},
+										{
+											"key": "plot",
+											"value": "full"
+										}
+									]
+								},
+								"description": "Checks the search and saves the name of the movie"
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "d8a67226-9b5a-44e6-aa29-8d0ceadab470",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "ea0c5f27-b0cf-47ac-921b-e342df5b2cec",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "91e8d0ab-0acd-480c-bac3-b64c5aaa1742",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1b2646dd-b849-48fb-9dc2-768406457695",
+						"type": "text/javascript",
+						"exec": [
+							"res = pm.response.json();",
+							"",
+							"pm.test(\"Status test\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"The Response is true\", function () {",
+							"    pm.expect(res.Response.toLowerCase()).to.be.equal('true')",
+							"});"
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
